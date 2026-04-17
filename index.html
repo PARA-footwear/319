@@ -3,7 +3,7 @@
 
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чоловічі кеди за натуральної шкіри | BRAXTON Legacy</title>
     <meta name="description" content="Легкі та дихаючі кеди для справжнього комфорту восени та влітку. Виконані повністю з натуральних матеріалів. Гарантують зручність при щоденному носінн">
     
@@ -52,7 +52,7 @@
         .product-gallery { flex: 1 1 600px; padding: 40px; background-color: #f8f8f8; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         .gallery-layout { display: flex; align-items: center; justify-content: center; gap: 20px; width: 100%; }
-        .main-image-container { flex: 1; max-width: 500px; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 8px; position: relative; background-color: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); touch-action: pan-y; cursor: crosshair; }
+        .main-image-container { flex: 1; max-width: 500px; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 8px; position: relative; background-color: #fff; box-shadow: 0 8px 25px rgba(0,0,0,0.05); touch-action: pan-y pinch-zoom; cursor: crosshair; }
         .main-image-container img { width: 100%; height: 100%; object-fit: contain; transition: opacity 0.2s ease, transform 0.1s ease; pointer-events: none; }
         
         .nav-arrow { width: 50px; height: 50px; background: #fff; border: 1px solid #eaeaea; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #111; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-shrink: 0; z-index: 10; }
@@ -161,9 +161,13 @@
         .mobile-only { display: none; }
         .mobile-sticky-buy { display: none; }
         
-        #imageLightbox { flex-direction: column; }
-        #lightboxImage { max-width: 95%; max-height: 80vh; object-fit: contain; border-radius: 8px; }
-        .lightbox-controls { display: flex; justify-content: center; gap: 40px; margin-top: 20px; align-items: center; width: 100%; }
+        /* === ОНОВЛЕНИЙ ЛАЙТБОКС === */
+        #imageLightbox { flex-direction: column; justify-content: center; padding-top: 20px; }
+        .lightbox-scroll-wrap { width: 100%; height: 75vh; overflow: auto; -webkit-overflow-scrolling: touch; display: flex; align-items: center; justify-content: center; }
+        .lightbox-scroll-wrap.zoomed { display: block; }
+        #lightboxImage { max-width: 100%; max-height: 100%; object-fit: contain; transition: width 0.3s ease, max-height 0.3s ease; cursor: zoom-in; }
+        #lightboxImage.zoomed-img { max-width: none; max-height: none; width: 250%; cursor: zoom-out; }
+        .lightbox-controls { display: flex; justify-content: center; gap: 40px; margin-top: 15px; align-items: center; width: 100%; flex-shrink: 0; }
         .lb-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; width: 50px; height: 50px; border-radius: 50%; font-size: 24px; display: flex; align-items: center; justify-content: center; }
 
         @media (max-width: 768px) {
@@ -411,7 +415,9 @@
 
     <div id="imageLightbox" class="modal" onclick="closeLightbox(event)">
         <span class="close-modal" onclick="closeLightbox(event)">×</span>
-        <img id="lightboxImage" src="">
+        <div class="lightbox-scroll-wrap" id="lbScrollWrap" onclick="toggleZoom(event)">
+            <img id="lightboxImage" src="">
+        </div>
         <div class="lightbox-controls">
             <button class="lb-btn" onclick="changeImageByStep(-1); event.stopPropagation();">❮</button>
             <span id="lbCounter" style="color: #fff; font-size: 16px; font-weight: 600;">1 / 5</span>
@@ -516,6 +522,12 @@
             dot.className = 'dot' + (i === imgIdx ? ' active' : '');
             dotsContainer.appendChild(dot);
         });
+        
+        // Скидання зуму при зміні фото
+        const lbImg = document.getElementById('lightboxImage');
+        const lbWrap = document.getElementById('lbScrollWrap');
+        if(lbImg) lbImg.classList.remove('zoomed-img');
+        if(lbWrap) lbWrap.classList.remove('zoomed');
     }
 
     function changeImageByStep(s) {
@@ -544,21 +556,53 @@
         item.classList.toggle('active');
     }
 
-    // --- Логіка Lightbox (Повноекранне фото та свайп) ---
+    // --- Логіка Lightbox ---
     function openLightbox() {
-        if(window.innerWidth > 768) return; // На ПК працює лупа, Lightbox тільки для мобільних
+        if(window.innerWidth > 768) return; 
         document.getElementById('lightboxImage').src = document.getElementById('mainImage').src;
         document.getElementById('imageLightbox').style.display = 'flex';
         const imgs = productImages[activeColorKey];
         document.getElementById('lbCounter').innerText = (imgIdx + 1) + ' / ' + imgs.length;
-        // Додаємо запис в історію браузера, щоб працювала кнопка "Назад" на телефоні
         history.pushState({ modal: 'lightbox' }, '');
     }
 
+    // --- НОВИЙ ЗУМ ПО КЛІКУ ---
+    function toggleZoom(e) {
+        e.stopPropagation();
+        const img = document.getElementById('lightboxImage');
+        const wrap = document.getElementById('lbScrollWrap');
+        
+        if (!img.classList.contains('zoomed-img')) {
+            img.classList.add('zoomed-img');
+            wrap.classList.add('zoomed');
+            
+            // Намагаємося відцентрувати на точці кліку
+            const rect = img.getBoundingClientRect();
+            const touchX = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth/2;
+            const touchY = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight/2;
+            
+            const ratioX = touchX / window.innerWidth;
+            const ratioY = touchY / window.innerHeight;
+
+            setTimeout(() => {
+                wrap.scrollLeft = (wrap.scrollWidth * ratioX) - (wrap.clientWidth / 2);
+                wrap.scrollTop = (wrap.scrollHeight * ratioY) - (wrap.clientHeight / 2);
+            }, 10);
+        } else {
+            img.classList.remove('zoomed-img');
+            wrap.classList.remove('zoomed');
+        }
+    }
+
     function closeLightbox(e) {
-        // Закриваємо тільки якщо клік не по самому фото
-        if(e && e.target && e.target.id !== 'imageLightbox' && !e.target.classList.contains('close-modal') && e.target.tagName !== 'BUTTON') return;
+        if(e && e.target && e.target.id !== 'imageLightbox' && !e.target.classList.contains('close-modal') && !e.target.classList.contains('lightbox-scroll-wrap') && e.target.tagName !== 'BUTTON') return;
         document.getElementById('imageLightbox').style.display = 'none';
+        
+        const img = document.getElementById('lightboxImage');
+        const wrap = document.getElementById('lbScrollWrap');
+        if(img) img.classList.remove('zoomed-img');
+        if(wrap) wrap.classList.remove('zoomed');
+        
         if (history.state && history.state.modal === 'lightbox') {
             history.back();
         }
@@ -609,7 +653,6 @@
         }
     }
 
-    // Обробка апаратної кнопки "Назад" на телефоні або свайпу назад
     window.addEventListener('popstate', function(e) {
         document.getElementById('imageLightbox').style.display = 'none';
         document.getElementById('orderModal').style.display = 'none';
@@ -645,9 +688,17 @@
 
         function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+        // Перехоплення UTM-міток
+        const currentUrlParams = new URLSearchParams(window.location.search);
+        let utmInfo = '';
+        if(currentUrlParams.has('utm_source')) {
+            utmInfo = `\n\n📊 <b>Аналітика:</b>\nДжерело: ${esc(currentUrlParams.get('utm_source'))}\nКампанія: ${esc(currentUrlParams.get('utm_campaign') || '-')}\nКреатив: ${esc(currentUrlParams.get('utm_content') || '-')}\nАудиторія: ${esc(currentUrlParams.get('utm_term') || '-')}`;
+        }
+
         let text = `📦 <b>НОВЕ ЗАМОВЛЕННЯ!</b>\n\nТовар: ${esc(`Чоловічі кеди за натуральної шкіри`)}\nКолір: ${esc(activeColorName)}\nРозмір: ${esc(activeSize)}\nЦіна: 3500 грн\n\nКлієнт: ${esc(name)}\nТел: <code>${displayPhone}</code>\nНаселений пункт: ${esc(city)}\nПошта: ${esc(post)}`;
         
         if (comment.trim() !== "") text += `\nКоментар: ${esc(comment)}`;
+        text += utmInfo; 
 
         const token = '8682349813:AAH8KuVg1KNY-c_nBu2EEz2l0f_1QloTqW8';
         const chatsStr = "8345637105, 5137629200, -5150186307";
