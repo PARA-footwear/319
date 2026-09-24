@@ -238,7 +238,7 @@
         </div>
 
         <div class="product-info">
-            <h1>Чоловічі кеди за натуральної шкіри</h1>
+            <h1>Чоловічі кеди з натуральної шкіри</h1>
             
             <div class="rating">
                 ★ ★ ★ ★ ★ <span class="r-val">4.9</span> <span class="r-count">(36 відгуків)</span>
@@ -657,7 +657,7 @@
         if (m.style.display === 'flex') return;
 
         document.getElementById('orderSummary').innerHTML = `
-            <div><strong>Модель:</strong> Чоловічі кеди за натуральної шкіри</div>
+            <div><strong>Модель:</strong> Чоловічі кеди з натуральної шкіри</div>
             <div style="margin: 5px 0;"><strong>Колір:</strong> ${activeColorName}</div>
             <div><strong>Розмір:</strong> ${activeSize}</div>
             <div style="margin-top: 10px; font-size: 18px; color: #d32f2f;"><strong>Сума:</strong> <span style="font-weight: 800;">3500 ₴</span></div>
@@ -771,7 +771,7 @@
         let linkPhone = "38" + cleanPhone; 
 
         const orderData = {
-            productName: "Чоловічі кеди за натуральної шкіри",
+            productName: "Чоловічі кеди з натуральної шкіри",
             colorName: activeColorName,
             size: activeSize,
             price: "3500",
@@ -795,7 +795,7 @@
                 if(typeof fbq === 'function') fbq('track', 'Purchase', {
                     value: Number('3500'), 
                     currency: 'UAH', 
-                    content_name: 'Чоловічі кеди за натуральної шкіри ' + activeColorName
+                    content_name: 'Чоловічі кеди з натуральної шкіри ' + activeColorName
                 });
                 
                 if(window.ttq) {
@@ -806,7 +806,7 @@
                         contents:[{
                             content_id: 'para_item',
                             content_type: 'product',
-                            content_name: 'Чоловічі кеди за натуральної шкіри ' + activeColorName
+                            content_name: 'Чоловічі кеди з натуральної шкіри ' + activeColorName
                         }]
                     });
                 }
