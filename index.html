@@ -493,7 +493,6 @@
     let activeSize = '';
     let currentSlideIndex = 0;
 
-    const NP_API_KEY = 'ba57ffe8b4cf24a2782c9e81f4b83073';
     let npSelectedCityRef = '';
 
     function toggleDelivery() {
@@ -910,11 +909,10 @@
                 
                 cityDebounce = setTimeout(async () => {
                     try {
-                        const res = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+                        const res = await fetch('https://para-proxy.thecupoftea1000.workers.dev/np', {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                apiKey: NP_API_KEY,
-                                modelName: "Address",
                                 calledMethod: "searchSettlements",
                                 methodProperties: { CityName: val, Limit: "50" }
                             })
@@ -954,11 +952,10 @@
                 
                 whDebounce = setTimeout(async () => {
                     try {
-                        const res = await fetch('https://api.novaposhta.ua/v2.0/json/', {
+                        const res = await fetch('https://para-proxy.thecupoftea1000.workers.dev/np', {
                             method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                apiKey: NP_API_KEY,
-                                modelName: "Address",
                                 calledMethod: "getWarehouses",
                                 methodProperties: { CityRef: npSelectedCityRef, FindByString: val, Limit: "50" }
                             })
